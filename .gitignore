@@ -1,0 +1,8 @@
+# no node_modules
+node_modules/
+
+#no certs
+ssl_cert/
+
+#no .idea folder shit
+.idea/
