@@ -3,6 +3,7 @@ node_modules/
 
 #no certs
 ssl_cert/
+alt_cert/
 
 #no .idea folder shit
 .idea/
