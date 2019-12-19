@@ -36,15 +36,16 @@ io.on('connection', (socket) => {
 
 
 	socket.on('new_action', (data) => {
-		console.log(' made a new action: ' + data);
-		io.sockets.emit('response', {msg: "this is a response"})
+		const parsed = JSON.parse(data);
+		console.log(' made a new action: ' + parsed.content + " " + parsed.posX);
+		io.sockets.emit('response', parsed)
 	});
-	
+
 	socket.on('disconnect', (err) => {
 		console.log('disconnected:');
 		console.log(err);
 	})
-	
+
 	socket.on('error', (err) => {
 		console.log('error!');
 		console.log(err)
