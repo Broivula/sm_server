@@ -1,7 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const https = require('https');
 const fs = require('fs');
 const app = express();
+const mysql = require('mysql')
+
 
 const options = {
 	key: fs.readFileSync('./ssl_cert/key.pem'),
@@ -36,9 +39,9 @@ io.on('connection', (socket) => {
 
 
 	socket.on('new_action', (data) => {
-		const parsed = JSON.parse(data);
-		console.log(' made a new action: ' + parsed.content + " " + parsed.posX);
-		io.sockets.emit('response', parsed)
+		//const parsed = JSON.parse(data)
+	//	console.log(' made a new action: ' + parsed.content + " " + parsed.posX);
+		io.sockets.emit('response', data)
 	});
 
 	socket.on('disconnect', (err) => {
