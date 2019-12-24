@@ -11,15 +11,33 @@ const options = {
 	cert: fs.readFileSync('./alt_cert/ca.crt')
 };
 
+const db = mysql.createConnection({
+	host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB
+})
+
 const https_server = https.createServer(options, app);
 
-
+db.connect((err) => {
+    if(err){
+        throw err;
+    }
+    console.log('mysql connected..');
+});
 
 // --> routing
 
 app.get('/', (req, res) => {
 	console.log('yo, someones here!');
 	res.json({msg: 'yo, bitch'});
+});
+
+app.post('/element_state', (req, res) => {
+	var parsed = JSON.parse(req.body.data)
+	console.log('incoming data, saving following data: ')
+	console.log(parsed)
 });
 
 

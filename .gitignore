@@ -7,3 +7,7 @@ alt_cert/
 
 #no .idea folder shit
 .idea/
+
+#no secret shit bro
+.env
+db_init_commands
