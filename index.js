@@ -54,12 +54,16 @@ const listener = https_server.listen(server_port, () => {
 
 const socket_server = net.createServer({allowHalfOpen: true});
 socket_server.on('connection', (socket) => {
-		socket.setEncoding('utf-8');
 
-		console.log("new connection!");
-		console.log(socket);
-		clients.push(socket);
-		socket.on('data', (data) => {
+	socket.setEncoding('utf-8');
+
+	console.log("new connection!");
+	clients.push(socket);
+		
+	socket.on('data', (data) => {
+		// essentially we don't need this, since with 99% certainty
+		// the socket communcation will be only server -> client, (no client-> server needed)
+		// the client -> server communication will happen not via sockets.
 		console.log("received some data!");
 		if (data.length > 5) {
 			try{
