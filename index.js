@@ -4,34 +4,38 @@ const https = require('https');
 const fs = require('fs');
 const app = express();
 const mysql = require('mysql')
-
-
+const server_port = 8928
+const socket_port = 8929
+const net = require('net');
+let clients = []
 const options = {
-	key: fs.readFileSync('./ssl_cert/key.pem'),
-	cert: fs.readFileSync('./alt_cert/ca.crt')
+	key: fs.readFileSync('./ssl_cert/server.key'),
+	cert: fs.readFileSync('./ssl_cert/server.cert')
 };
-
+/*
 const db = mysql.createConnection({
 	host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB
 })
-
+*/
 const https_server = https.createServer(options, app);
 
+/*
 db.connect((err) => {
     if(err){
         throw err;
     }
     console.log('mysql connected..');
 });
-
+*/
 // --> routing
 
 app.get('/', (req, res) => {
 	console.log('yo, someones here!');
 	res.json({msg: 'yo, bitch'});
+	sendDataToClient(clients[0], "some data, yo");
 });
 
 app.post('/element_state', (req, res) => {
@@ -41,37 +45,61 @@ app.post('/element_state', (req, res) => {
 });
 
 
-const listener = https_server.listen(3000, () => {
-	console.log('server started, listening on port 3000');
+const listener = https_server.listen(server_port, () => {
+	console.log('server started, listening on port ' + server_port);
 });
 
 
 // --> socket
 
+const socket_server = net.createServer({allowHalfOpen: true});
+socket_server.on('connection', (socket) => {
+		socket.setEncoding('utf-8');
 
+		console.log("new connection!");
+		console.log(socket);
+		clients.push(socket);
+		socket.on('data', (data) => {
+		console.log("received some data!");
+		if (data.length > 5) {
+			try{
+				console.log('successfully received data!');
+				console.log(data.toString())
+				sendDataToClient(socket, "take some data, bitch");
 
-const io = require('socket.io')(listener);
-
-io.on('connection', (socket) => {
-	console.log('new connection, lmao');
-
-
-	socket.on('new_action', (data) => {
-		//const parsed = JSON.parse(data)
-	//	console.log(' made a new action: ' + parsed.content + " " + parsed.posX);
-		io.sockets.emit('response', data)
+			}catch(err){
+				console.log('error while handling incoming data');
+				console.log('sent data: ');
+				console.log(data.toString());
+				console.log('error message: ');
+				console.log(err);
+			}
+		}
 	});
 
-	socket.on('disconnect', (err) => {
-		console.log('disconnected:');
-		console.log(err);
-	})
+	socket.on('end', (data) => {
+		console.log('socket ended.');
+		console.log(data);
+		// just clearing all the clients for now
+		// it works (and does what it's supposed to do, since we are always going to just have one client)
+		// but it's not super beautiful.
+		clients.length = 0;
+	});
 
 	socket.on('error', (err) => {
-		console.log('error!');
-		console.log(err)
+		console.log('error with socket:');
+		console.log(err);
 	});
 
+	socket.on('close',() => {
+		console.log('socket closed.');
+		clients.length = 0;
+	});
 });
 
+socket_server.listen(socket_port, '127.0.0.1');
+	
+const sendDataToClient = (client, data) => {
+	client.write(`${data}\n`);
+};
 
