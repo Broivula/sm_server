@@ -35,7 +35,7 @@ db.connect((err) => {
 app.get('/', (req, res) => {
 	console.log('yo, someones here!');
 	res.json({msg: 'yo, bitch'});
-	sendDataToClient(clients[0], "some data, yo");
+	sendDataToClient(clients[0], "1");
 });
 
 app.post('/element_state', (req, res) => {
@@ -69,8 +69,6 @@ socket_server.on('connection', (socket) => {
 			try{
 				console.log('successfully received data!');
 				console.log(data.toString())
-				sendDataToClient(socket, "take some data, bitch");
-
 			}catch(err){
 				console.log('error while handling incoming data');
 				console.log('sent data: ');
