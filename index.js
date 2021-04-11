@@ -1,12 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const https = require('https');
+const bodyParser = require('body-parser');
 const fs = require('fs');
 const app = express();
 const mysql = require('mysql')
 const server_port = 8928
 const socket_port = 8929
 const net = require('net');
+const sf = require("./socket_communication");
 let clients = []
 const options = {
 	key: fs.readFileSync('./ssl_cert/server.key'),
@@ -22,6 +24,8 @@ const db = mysql.createConnection({
 */
 const https_server = https.createServer(options, app);
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 /*
 db.connect((err) => {
     if(err){
@@ -38,10 +42,10 @@ app.get('/', (req, res) => {
 	sendDataToClient(clients[0], "1");
 });
 
-app.post('/element_state', (req, res) => {
-	var parsed = JSON.parse(req.body.data)
-	console.log('incoming data, saving following data: ')
-	console.log(parsed)
+app.post('/note', (req, res) => {
+  console.log(req.body);
+  let data = req.body;
+  sf.sendDataToClient(clients[0], data)
 });
 
 
@@ -102,6 +106,7 @@ socket_server.on('connection', (socket) => {
 socket_server.listen(socket_port, '127.0.0.1');
 	
 const sendDataToClient = (client, data) => {
+  console.log(data);
 	client.write(`${data}\n`);
 };
 
